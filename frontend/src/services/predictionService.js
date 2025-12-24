@@ -1,82 +1,75 @@
-import { predictionService } from './apiService'
+// src/services/predictionService.js
+import { fetchWeatherData, getCrowdImpactFromWeather } from './weatherService'
 
-// Mock prediction function for development
 export const predictCrowding = async (data) => {
-  // In development, return mock data
-  if (!import.meta.env.VITE_API_BASE_URL) {
-    return mockPrediction(data)
-  }
-
-  // In production, call actual API
-  try {
-    return await predictionService.getPrediction(data)
-  } catch (error) {
-    console.error('Prediction API error:', error)
-    throw error
-  }
-}
-
-const mockPrediction = (data) => {
-  // Simple mock prediction logic
-  const hour = parseInt(data.time.split(':')[0])
-  let level = 'medium'
-  let confidence = 75
+  console.log('Prediction request:', data)
   
-  // Mock logic based on time
-  if ((hour >= 7 && hour <= 9) || (hour >= 17 && hour <= 19)) {
-    level = 'high'
-    confidence = 85
-  } else if (hour >= 10 && hour <= 16) {
-    level = 'medium'
-    confidence = 70
-  } else {
-    level = 'low'
-    confidence = 90
+  try {
+    // Fetch real weather data
+    const weatherData = await fetchWeatherData(data.city || 'Smart City')
+    const weatherImpact = getCrowdImpactFromWeather(weatherData)
+    
+    // Enhanced prediction logic with weather impact
+    const hour = parseInt(data.time.split(':')[0])
+    let baseLevel = 'medium'
+    let baseConfidence = 75
+    
+    // Time-based prediction
+    if ((hour >= 7 && hour <= 9) || (hour >= 17 && hour <= 19)) {
+      baseLevel = 'high'
+      baseConfidence = 85
+    } else if (hour >= 22 || hour <= 5) {
+      baseLevel = 'low'
+      baseConfidence = 90
+    }
+    
+    // Adjust based on weather impact
+    let finalLevel = baseLevel
+    let finalConfidence = baseConfidence
+    
+    if (weatherImpact.level >= 2) {
+      // Bad weather increases crowding
+      if (baseLevel === 'low') finalLevel = 'medium'
+      if (baseLevel === 'medium') finalLevel = 'high'
+      finalConfidence = Math.min(95, baseConfidence + 5)
+    } else if (weatherImpact.level === 0) {
+      // Good weather might reduce crowding
+      if (baseLevel === 'high') finalLevel = 'medium'
+      finalConfidence = Math.min(95, baseConfidence + 2)
+    }
+    
+    // Holiday adjustment
+    if (data.holiday) {
+      finalLevel = 'low'
+      finalConfidence = Math.min(95, finalConfidence + 5)
+    }
+    
+    return {
+      id: `pred_${Date.now()}`,
+      route: data.route,
+      date: data.date,
+      time: data.time,
+      level: finalLevel,
+      confidence: finalConfidence,
+      estimatedCrowd: `${Math.floor(Math.random() * 100) + 50} people`,
+      historicalAccuracy: Math.floor(Math.random() * 15) + 80,
+      weather: {
+        condition: weatherData.current.condition,
+        impact: weatherImpact.level,
+        description: weatherImpact.description,
+        suggestions: weatherImpact.suggestions,
+      },
+      timestamp: new Date().toISOString(),
+      factors: {
+        timeOfDay: hour,
+        weatherImpact: weatherImpact.level,
+        isHoliday: data.holiday || false,
+        dayOfWeek: new Date(data.date).getDay(),
+      },
+    }
+    
+  } catch (error) {
+    console.error('Prediction error:', error)
+    return getMockPrediction(data)
   }
-
-  // Adjust based on weather
-  if (data.weather === 'rainy' || data.weather === 'snowy') {
-    level = 'high'
-    confidence = Math.min(95, confidence + 10)
-  }
-
-  // Adjust based on holiday
-  if (data.holiday) {
-    level = 'low'
-    confidence = Math.min(95, confidence + 5)
-  }
-
-  return {
-    id: `pred_${Date.now()}`,
-    route: data.route,
-    date: data.date,
-    time: data.time,
-    level,
-    confidence,
-    estimatedCrowd: `${Math.floor(Math.random() * 100) + 50} people`,
-    historicalAccuracy: Math.floor(Math.random() * 15) + 80,
-    suggestions: getSuggestions(level),
-    timestamp: new Date().toISOString(),
-  }
-}
-
-const getSuggestions = (level) => {
-  const suggestions = {
-    low: [
-      'Ideal time to travel',
-      'Consider walking or cycling',
-      'Public transport will be comfortable',
-    ],
-    medium: [
-      'Expect moderate crowding',
-      'Consider alternative routes',
-      'Allow extra travel time',
-    ],
-    high: [
-      'Consider working remotely if possible',
-      'Use alternative transport modes',
-      'Travel during off-peak hours',
-    ],
-  }
-  return suggestions[level] || []
 }

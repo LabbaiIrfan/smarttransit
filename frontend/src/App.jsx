@@ -11,6 +11,7 @@ import TrendsPage from './pages/TrendsPage'
 import FeedbackPage from './pages/FeedbackPage'
 import AdminPanel from './pages/AdminPanel'
 import SettingsPage from './pages/SettingsPage'
+import ChatPage from './pages/ChatPage' // Add this import
 import NotFound from './pages/NotFound'
 
 function App() {
@@ -29,6 +30,7 @@ function App() {
         <Route path="/predict" element={<PredictionPage />} />
         <Route path="/trends" element={<TrendsPage />} />
         <Route path="/feedback" element={<FeedbackPage />} />
+        <Route path="/chat" element={<ChatPage />} /> {/* Add this route */}
         <Route path="/admin" element={
           <ProtectedRoute adminOnly>
             <AdminPanel />
