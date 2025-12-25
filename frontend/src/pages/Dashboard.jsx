@@ -26,7 +26,6 @@ import {
   Database
 } from 'lucide-react'
 import { Link } from 'react-router-dom'
-import StatCard from '../components/common/StatCard'
 import RouteSelector from '../components/sections/RouteSelector'
 import CrowdPredictionChart from '../components/charts/CrowdPredictionChart'
 import WeatherWidget from '../components/sections/WeatherWidget'
@@ -98,78 +97,6 @@ const Dashboard = () => {
             <span className="text-sm">Refresh</span>
           </button>
         </div>
-      </div>
-
-      {/* Stats Grid - Enhanced */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard
-          icon={<BarChart3 className="w-6 h-6" />}
-          title="Total Predictions"
-          value={stats.totalPredictions.toLocaleString()}
-          change="+12% this month"
-          color="text-primary-400"
-          trend="up"
-        />
-        <StatCard
-          icon={<Bus className="w-6 h-6" />}
-          title="Avg. Crowd Level"
-          value={stats.avgCrowdLevel.toFixed(1)}
-          change="Medium"
-          color="text-yellow-400"
-          trend="neutral"
-        />
-        <StatCard
-          icon={<Users className="w-6 h-6" />}
-          title="Prediction Accuracy"
-          value={`${stats.accuracyRate}%`}
-          change="+2.3% from last month"
-          color="text-green-400"
-          trend="up"
-        />
-        <StatCard
-          icon={<Database className="w-6 h-6" />}
-          title="Routes Monitored"
-          value={stats.routesMonitored}
-          change="+3 new routes"
-          color="text-purple-400"
-          trend="up"
-        />
-      </div>
-
-      {/* Second Row Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard
-          icon={<Activity className="w-6 h-6" />}
-          title="Active Users"
-          value={stats.activeUsers.toLocaleString()}
-          change="+8% today"
-          color="text-cyan-400"
-          trend="up"
-        />
-        <StatCard
-          icon={<Clock className="w-6 h-6" />}
-          title="Response Time"
-          value={`${stats.responseTime}ms`}
-          change="-15ms improved"
-          color="text-blue-400"
-          trend="down"
-        />
-        <StatCard
-          icon={<Eye className="w-6 h-6" />}
-          title="Data Accuracy"
-          value={`${stats.dataAccuracy}%`}
-          change="+1.2% this week"
-          color="text-green-400"
-          trend="up"
-        />
-        <StatCard
-          icon={<Target className="w-6 h-6" />}
-          title="Peak Hours"
-          value={stats.peakHours}
-          change="Most crowded: 8-9 AM"
-          color="text-orange-400"
-          trend="neutral"
-        />
       </div>
 
       {/* Main Content Grid */}
